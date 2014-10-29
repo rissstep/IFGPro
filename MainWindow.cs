@@ -24,11 +24,12 @@ namespace IFGPro
 {
     internal partial class  MainWindow : Form
     {
+        private string formName = "IFGPro 0.93beta - ";
         #region Variableeees
         //Project name
         public string projectName;
 
-        private string formName = "IFGPro 0.91beta - ";
+        
         //List of points for naca profile
         public static List<PointF> nacaProfile;
         //Points for cutten profile (real length)
@@ -109,6 +110,7 @@ namespace IFGPro
         {
             InitializeComponent();
             comboBoxScale.SelectedIndex = 0;
+            this.Text = formName;
             
             try
             {
@@ -229,13 +231,20 @@ namespace IFGPro
                 MessageBox.Show("Problem with EMGU library!!"+e.Message);
                 this.Close();
             }
-            OpenImage(image_for_emgu);
-            imageBox.ZoomToFit();
 
             //get from default folder
             GetAirfoils();
             //open profile
             LoadActualAirfoil();
+            if(isInit == false)
+                foreach (MyImage im in images.imagesList)
+                {
+                    im.setPoint1(im.point1.Point);
+                }
+
+            OpenImage(image_for_emgu);
+            imageBox.ZoomToFit();
+
 
             //load settings
             try 
@@ -1212,7 +1221,15 @@ namespace IFGPro
         }
         private void loadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            LoadProject();
+            try
+            {
+                LoadProject();
+            }
+            catch(Exception ex) 
+            {
+                MessageBox.Show("File you want to load is not compatible with version of IFGPro you are using.\n"+ex.Message);
+            }
+            
         }
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2227,6 +2244,7 @@ namespace IFGPro
             images.dTau = MeasureParameters.dTau;
             images.w0 = MeasureParameters.w0;
             images.M = MeasureParameters.M;
+            
 
             images.A = A;
             images.B = B;
@@ -2238,6 +2256,7 @@ namespace IFGPro
             images.PercentRealLenght = PercentRealLenght;
             images.idealLength = idealLength;
             images.scale = Double.Parse(tb_scale.Text);
+            images.ratio = GlobalSettings.ratio;
             images.listFixedInImage = listFixedInImage;
             images.listFixedInObject = listFixedInObject;
 
@@ -2260,6 +2279,10 @@ namespace IFGPro
                 p.color = p.pen.Color.ToString();
             }
 
+            foreach (MyImage mi in images.imagesList)
+            {
+                mi.arrayProfile = null;
+            }
             try
             {
                 SerializeObject(Path.GetDirectoryName(images.imagesList[0].path) + "\\" + projectName + ".ifg", images);
@@ -2268,6 +2291,12 @@ namespace IFGPro
             catch (Exception e){
                 MessageBox.Show("Project was not saved!" + e.Message);  
             }
+            foreach (MyImage im in images.imagesList)
+            {
+                im.setPoint1(im.point1.Point);
+            }
+                
+
             
         }
         public void LoadProject()
@@ -2332,6 +2361,7 @@ namespace IFGPro
                 realLength = mages.realLength;
                 idealLength = mages.idealLength;
                 tb_scale.Text = mages.scale.ToString();
+                GlobalSettings.ratio = mages.ratio;
                 listFixedInImage = mages.listFixedInImage;
                 listFixedInObject = mages.listFixedInObject;
 
@@ -2352,8 +2382,6 @@ namespace IFGPro
 
                 string new_path = Path.GetDirectoryName(openFileDialog1.FileName);
                 path = new_path + "\\" + images.imagesList[0].name;
-
-                
 
                 if (!isInit)
                 {
@@ -2381,17 +2409,18 @@ namespace IFGPro
                 UpdateObjectFixedPoints();
                 UpdateStatusBar();
 
-                if (images.imagesList != null)
-                    foreach (Line l in images.getActual().listLines)
-                    {
-                        images.getActual().setLine(l, l.pointOfProfile.Point);
-                    }
-
                 foreach (MyImage im in images.imagesList)
                 {
                     im.path = new_path + "\\" + im.name;
                     im.setPoint1(im.point1.Point);
                 }
+                
+
+                if (images.imagesList != null)
+                    foreach (Line l in images.getActual().listLines)
+                    {
+                        images.getActual().setLine(l, l.pointOfProfile.Point);
+                    }
 
                 imageBox.Invalidate();
                 setDataGrids();
@@ -2493,10 +2522,6 @@ namespace IFGPro
             //    x.Serialize(writer, objectToSerialize); 
             //} 
 
-            foreach (MyImage mi in objectToSerialize.imagesList)
-            {
-                mi.arrayProfile = null;
-            }
             Stream stream = File.Open(filename, FileMode.Create);
             BinaryFormatter bFormatter = new BinaryFormatter();
             bFormatter.Serialize(stream, objectToSerialize);
@@ -2620,7 +2645,7 @@ namespace IFGPro
             img._GammaCorrect((double)track_gamma.Value / 10);
             image_for_emgu = img;
             imageBox.Image = img.ToBitmap();
-            if (images.imagesList != null)
+            if (images.imagesList != null && images.getActual().arrayProfile != null)
                 foreach (Line l in images.getActual().listLines)
                 {
                     images.getActual().setLine(l, l.pointOfProfile.Point);

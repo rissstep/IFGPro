@@ -293,7 +293,7 @@ namespace IFGPro
             double sDistance = double.MaxValue;
             PointF tmpP;
             double tmpD;
-            
+
 
             foreach (PointF testPoint in array)
             {

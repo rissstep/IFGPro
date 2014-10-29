@@ -53,6 +53,7 @@ namespace IFGPro
         public float PercentRealLenght;
         public double realLength;
         public double scale;
+        public double ratio;
 
         public List<ObjectPoint> listFixedInObject = new List<ObjectPoint>();
         public List<ImagePoint> listFixedInImage = new List<ImagePoint>();
