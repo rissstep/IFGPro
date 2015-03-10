@@ -27,7 +27,7 @@ namespace IFGPro
 
         private string f_index = String.Empty;
         private double fringe_i = 0;
-        private double _pressure = 0;
+        public double _pressure = 0;
         private double _velocity = 0;
         private double _density = 0;
         private double _mach = 0;
@@ -44,21 +44,12 @@ namespace IFGPro
         
         public string Position
         { get { return string.Format("X:{0}, Y:{1}", (int)pointOnProfile.Point.X, (int)pointOnProfile.Point.Y); } set { this.s = value; } }
-        public int Index
-        { get { return _index; } set {
-            _index = value;
-            if (!String.IsNullOrEmpty(f_index))
+
+        public string F_Index
+        {
+            get { return f_index; }
+            set
             {
-                viewIndex = _index.ToString() + "/" + f_index;
-            }
-            else
-            {
-                viewIndex = _index.ToString();
-            }
-            OnPropertyChanged("Index"); } }
-        //public double Value { get { return _value; } set { _value = value; OnPropertyChanged("Value"); } }
-        public string F_Index { get { return f_index; } 
-            set {
                 try
                 {
                     fringe_i = Double.Parse(value.Replace(',', '.'), CultureInfo.InvariantCulture);
@@ -70,15 +61,13 @@ namespace IFGPro
                     f_index = String.Empty;
                 }
 
-                if (!String.IsNullOrEmpty(f_index))
-                {
-                    viewIndex = _index.ToString() + "/" + f_index;
-                }
-                else
-                {
-                    viewIndex = _index.ToString();
-                }
-                OnPropertyChanged("F_Index"); } }
+                //OnPropertyChanged("F_Index");
+            }
+        }
+        public int Index{ get { return _index; } set {
+            _index = value;
+            //OnPropertyChanged("Index"); 
+        } }
         public double Sur_Coor { get { return Math.Round(_sur_coor,3); } set { _sur_coor = value; } }
         public double Pressure { get { return Math.Round(_pressure, 3) / 1000; } set { _pressure = value; } }
         public double Mach { get { return Math.Round(_mach, 3); } set { _mach = value; } }
@@ -189,7 +178,7 @@ namespace IFGPro
         private void CalculateParameters()
         {
             double T0 = MeasureParameters.t0 + 273.15;
-            double C = (MeasureParameters.wave_lenght * 10e-9) / (MeasureParameters.L * 10e-3 * MeasureParameters.K);
+            double C = (MeasureParameters.wave_lenght * 1e-9) / (MeasureParameters.L * 1e-3 * MeasureParameters.K);
             double ro0 = MeasureParameters.p0 / (MeasureParameters.R * T0);
 
             double tmp = ((ro0 - (C * fringe_i)) / ro0);
@@ -208,17 +197,20 @@ namespace IFGPro
 
             _velocity = _mach * Math.Sqrt(MeasureParameters.k * MeasureParameters.R * Ti);
             _density = _pressure / (MeasureParameters.R * Ti);
+
+            
         }
 
         public override string ToString()
         {
-            return Index.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t" 
-                + _sur_coor.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
-                + F_Index.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
-                + _pressure.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
-                + _mach.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
-                + _velocity.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
-                + _density.ToString(CultureInfo.CreateSpecificCulture("en-GB"));
+            return 
+                F_Index.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
+                + Index.ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t" 
+                + Math.Round(_sur_coor,GlobalSettings.roundOthers).ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
+                + Math.Round(_pressure,GlobalSettings.roundOthers).ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
+                + Math.Round(_mach,GlobalSettings.roundOthers).ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
+                + Math.Round(_velocity,GlobalSettings.roundOthers).ToString(CultureInfo.CreateSpecificCulture("en-GB")) + "\t"
+                + Math.Round(_density, GlobalSettings.roundOthers).ToString(CultureInfo.CreateSpecificCulture("en-GB"));
         }
         
         private double xFactor(double p)

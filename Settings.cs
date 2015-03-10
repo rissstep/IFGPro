@@ -47,8 +47,8 @@ namespace IFGPro
             cb__profil.Checked = GlobalSettings.profil;
 
             textBox1.Text = GlobalSettings.roundTime.ToString();
-            textBox2.Text = GlobalSettings.roundPitch.ToString();
-            textBox3.Text = GlobalSettings.roundPlunge.ToString();
+            textBox2.Text = GlobalSettings.roundPitchPlunge.ToString();
+            textBox3.Text = GlobalSettings.roundOthers.ToString();
 
             cb_fringeLabelsPanel.Checked = GlobalSettings.fringeLabelsPanel;
             cb_fringeLabels.Checked = GlobalSettings.fringeLabels;
@@ -248,8 +248,8 @@ namespace IFGPro
             GlobalSettings.profil = cb__profil.Checked;
 
             GlobalSettings.roundTime = int.Parse(textBox1.Text);
-            GlobalSettings.roundPitch = int.Parse(textBox2.Text);
-            GlobalSettings.roundPlunge = int.Parse(textBox3.Text);
+            GlobalSettings.roundPitchPlunge = int.Parse(textBox2.Text);
+            GlobalSettings.roundOthers = int.Parse(textBox3.Text);
 
             GlobalSettings.fringeLabels = cb_fringeLabels.Checked;
             GlobalSettings.fringeLabelsPanel = cb_fringeLabelsPanel.Checked;

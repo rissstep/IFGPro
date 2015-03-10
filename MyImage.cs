@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml.Serialization;
+using System.Windows;
 
 
 namespace IFGPro
@@ -36,6 +37,20 @@ namespace IFGPro
         private int i;
         public PointF A;
         public PointF B;
+        public PointF EA;
+
+        public double drag_force = Double.NaN; 
+        public double drag_force_u = Double.NaN; 
+        public double drag_force_l = Double.NaN; 
+        public double lift_force = Double.NaN; 
+        public double lift_force_u = Double.NaN; 
+        public double lift_force_l = Double.NaN; 
+        public double M = Double.NaN; 
+        public double M_u = Double.NaN; 
+        public double M_l = Double.NaN; 
+        private double upper_distance = Double.NaN;
+        private double lower_distance = Double.NaN;
+        private double drove_distance = 0;
 
         public List<ImagePoint> listFringeLabels = new List<ImagePoint>();
 
@@ -47,8 +62,18 @@ namespace IFGPro
 
         //public PointF[] arrayProfile { get { return _arrayProfile; } set { _arrayProfile = value;} }    
 
-        public BindingList<Line> listUpperLines { get { return _listUpperLines; } set { _listUpperLines = value; OnPropertyChanged("listUpperLines"); } }
-        public BindingList<Line> listDownerLines { get { return _listDownerLines; } set { _listDownerLines = value; OnPropertyChanged("listDownerLines"); } }
+        public BindingList<Line> listUpperLines { get { return _listUpperLines; } set { 
+            _listUpperLines = value; 
+            //OnPropertyChanged("listUpperLines"); 
+        } }
+        public BindingList<Line> listDownerLines
+        {
+            get { return _listDownerLines; }
+            set
+            { 
+            _listDownerLines = value; 
+            //OnPropertyChanged("listDownerLines"); 
+            } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         internal void OnPropertyChanged(String propertyName)
@@ -510,8 +535,8 @@ namespace IFGPro
         public override string ToString() 
         {
             return name + "\t" + Math.Round(time,GlobalSettings.roundTime + 1).ToString(CultureInfo.CreateSpecificCulture("en-GB"))
-                + "\t" + Math.Round(pitch, GlobalSettings.roundPitch + 1).ToString(CultureInfo.CreateSpecificCulture("en-GB"))
-                + "\t" + Math.Round(plunge, GlobalSettings.roundPlunge + 1).ToString(CultureInfo.CreateSpecificCulture("en-GB"));
+                + "\t" + Math.Round(pitch, GlobalSettings.roundPitchPlunge + 1).ToString(CultureInfo.CreateSpecificCulture("en-GB"))
+                + "\t" + Math.Round(plunge, GlobalSettings.roundPitchPlunge + 1).ToString(CultureInfo.CreateSpecificCulture("en-GB"));
         }
         public bool isDesHit(PointF p, Cyotek.Windows.Forms.ImageBox i)
         {
@@ -529,5 +554,509 @@ namespace IFGPro
             return arrayProfile;
         }
 
+        private void upper_and_lower_distance(out double _upper_distance, out double _lower_distance){
+            int i = 0;
+            _upper_distance = 0;
+            _lower_distance = 0;
+            int flag = 0;
+
+            for (i = 0; i < MainWindow.nacaProfile.Count - 1; i++)
+            {
+                if (flag == 1 && MainWindow.nacaProfile[i].X == 0 && MainWindow.nacaProfile[i].Y == 0)
+                    flag = 2;
+                if (flag == 0)
+                {
+                    _upper_distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+                    if (MainWindow.nacaProfile[i + 1].X == 0 ||
+                       (MainWindow.nacaProfile[i].X <= MainWindow.A.X && MainWindow.nacaProfile[i + 1].X >= MainWindow.A.X))
+                    {
+                        flag = 1;
+                    }
+                }
+                else if (flag == 2)
+                {
+                    _lower_distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+                    if (MainWindow.nacaProfile[i + 1].X == 0 ||
+                       (MainWindow.nacaProfile[i].X <= MainWindow.B.X && MainWindow.nacaProfile[i + 1].X >= MainWindow.B.X))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        private PointF pointSurfaceCoor(double dist, bool down)
+        {
+            int i = 0;
+            double droveDistance = 0;
+            double upperDistance = 0;
+            double lowerDistance = 0;
+            PointF pointTmp = new PointF();
+            int flag = 0;
+
+            for (i = 0; i < MainWindow.nacaProfile.Count - 1; i++)
+            {
+                if (flag == 1 && MainWindow.nacaProfile[i].X == 0 && MainWindow.nacaProfile[i].Y == 0)
+                    flag = 2;
+                if (flag == 0)
+                {
+                    upperDistance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+                    if (MainWindow.nacaProfile[i + 1].X == 0 ||
+                       (MainWindow.nacaProfile[i].X <= MainWindow.A.X && MainWindow.nacaProfile[i + 1].X >= MainWindow.A.X))
+                    {
+                        flag = 1;
+                    }
+                }
+                else if (flag == 2)
+                {
+                    lowerDistance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+                    if (MainWindow.nacaProfile[i + 1].X == 0 ||
+                       (MainWindow.nacaProfile[i].X <= MainWindow.B.X && MainWindow.nacaProfile[i + 1].X >= MainWindow.B.X))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            for (i = 0; i < MainWindow.nacaProfile.Count - 1; i++)
+            {
+                if (MainWindow.nacaProfile[i].Y >= 0 && MainWindow.nacaProfile[i + 1].Y > 0 && down)
+                {
+                    droveDistance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+
+                    if (droveDistance >= dist * lowerDistance)
+                    {
+                        System.Windows.Vector v = new System.Windows.Vector(MainWindow.nacaProfile[i].X - MainWindow.nacaProfile[i + 1].X,
+                            MainWindow.nacaProfile[i].Y - MainWindow.nacaProfile[i + 1].Y);
+                        v.Normalize();
+                        v = System.Windows.Vector.Multiply(droveDistance - dist * lowerDistance, v);
+
+                        pointTmp = new PointF((float)(MainWindow.nacaProfile[i + 1].X + v.X), (float)(MainWindow.nacaProfile[i + 1].Y + v.Y));
+                        break;
+                    }
+                }
+                else if (MainWindow.nacaProfile[i].Y <= 0 && MainWindow.nacaProfile[i + 1].Y < 0 && !down)
+                {
+                    droveDistance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+
+                    if (droveDistance >= dist * upperDistance)
+                    {
+                        System.Windows.Vector v = new System.Windows.Vector(MainWindow.nacaProfile[i].X - MainWindow.nacaProfile[i + 1].X,
+                            MainWindow.nacaProfile[i].Y - MainWindow.nacaProfile[i + 1].Y);
+                        v.Normalize();
+                        v = System.Windows.Vector.Multiply(droveDistance - dist * upperDistance, v);
+
+                        pointTmp = new PointF((float)(MainWindow.nacaProfile[i + 1].X + v.X), (float)(MainWindow.nacaProfile[i + 1].Y + v.Y));
+                        break;
+                    }
+                }
+            }
+
+            double d = MainWindow.GetDistanceBetween(point1.Point, point1.Point);
+            if (MainWindow.PercentRealLenght == 100)
+                MainWindow.PercentRealLenght = 99.999f;
+            d = (d / MainWindow.PercentRealLenght) * 100;
+
+            pointTmp.X *= (float)d;
+            pointTmp.Y *= (float)d;
+
+            return pointTmp;
+        }
+
+        private void iterate_upper_side(int steps)
+        {
+            int i = 0,j;
+            PointF pointTmp;
+            double drove_distance = 0;
+            double dist = (1-0.5)*(1/steps);
+
+            double T0 = MeasureParameters.t0 + 273.15;
+            double ro0 = MeasureParameters.p0 / (MeasureParameters.R * T0);
+            double p0 = ro0 * Math.Pow(1 + (((MeasureParameters.k - 1) / 2) * Math.Pow(MeasureParameters.M,2)), (-1) / (MeasureParameters.k - 1));
+
+            drag_force_u =0;
+            lift_force_u =0;
+            M_u =0;
+            double w = MeasureParameters.L * 1e-3;
+
+            for (j = 0; j < steps; j++ ){
+                dist = (j + 1.0 - 0.5) * (1.0 / (double)(steps));
+                for (i = i; i < MainWindow.nacaProfile.Count - 1; i++)
+                {
+                    if (MainWindow.nacaProfile[i].Y >= 0 && MainWindow.nacaProfile[i + 1].Y > 0)
+                    {
+                        drove_distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+
+                        if (drove_distance >= dist * upper_distance)
+                        {
+                            Vector v = new Vector(  MainWindow.nacaProfile[i].X - MainWindow.nacaProfile[i + 1].X,
+                                                    MainWindow.nacaProfile[i].Y - MainWindow.nacaProfile[i + 1].Y);
+                            v.Normalize();
+                            Vector n1 = new Vector(v.Y, -v.X);
+                            Vector n2 = new Vector(-v.Y, v.X);
+                            Vector n;
+
+                            v = Vector.Multiply(drove_distance - dist * upper_distance, v);
+                            pointTmp = new PointF((float)(MainWindow.nacaProfile[i + 1].X + v.X), (float)(MainWindow.nacaProfile[i + 1].Y + v.Y));
+
+                            if (MainWindow.GetDistanceBetween(new PointF((float)(pointTmp.X + n1.X), (float)(pointTmp.Y + n1.Y)), new PointF((float)0.5, (float)0.0)) < 
+                                MainWindow.GetDistanceBetween(new PointF((float)(pointTmp.X + n2.X), (float)(pointTmp.Y + n2.Y)), new PointF((float)0.5, (float)0.0))
+                                )
+                                n = n1;
+                            else
+                                n = n2;
+
+                            //vecotr of 1m pointing inside
+                            n = Vector.Multiply(mm2px(1000), n);
+                            
+                            PointF nPoint = new PointF((float)(pointTmp.X + n.X), (float)(pointTmp.Y + n.Y));
+
+                            double dis = MainWindow.GetDistanceBetween(point1.Point, point2.Point);
+                            if (MainWindow.PercentRealLenght == 100)
+                                MainWindow.PercentRealLenght = 99.999f;
+                            dis = (dis / MainWindow.PercentRealLenght) * 100;
+
+                            pointTmp.X *= (float)dis;
+                            pointTmp.Y *= (float)dis;
+
+                            pointTmp = rotation_and_moving(pointTmp);
+                            n = rotation(n);
+                            n.Y *= -1;
+                            Vector dTmp = new Vector((float)(EA.X - pointTmp.X), (float)(-EA.Y + pointTmp.Y));
+
+                            double p_tmp = (p_upper((j - 0.5) * (1.0 / steps)) - MeasureParameters.p0);
+
+
+                            drag_force_u += p_tmp * px2mm(n.X) * 1e-3;
+                            lift_force_u += p_tmp * px2mm(n.Y) * 1e-3;
+                            M_u += px2mm((Vector.CrossProduct(dTmp, n))) * 1e-3 * p_tmp;
+                            break;                                
+                        }
+                    }
+                }
+            }
+
+            drag_force_u *= (1.0 / steps) * w;
+            lift_force_u *= (1.0 / steps)* w ;
+            M_u *= (1.0 / steps)* w;
+
+        }
+
+        private void iterate_lower_side(int steps)
+        {
+            int i = 0, j;
+            PointF pointTmp;
+            double drove_distance = 0;
+            double dist = (1 - 0.5) * (1 / steps);
+
+            double T0 = MeasureParameters.t0 + 273.15;
+            double ro0 = MeasureParameters.p0 / (MeasureParameters.R * T0);
+            double p0 = ro0 * Math.Pow(1 + (((MeasureParameters.k - 1) / 2) * Math.Pow(MeasureParameters.M, 2)), (-1) / (MeasureParameters.k - 1));
+
+            drag_force_l = 0;
+            lift_force_l = 0;
+            M_l = 0;
+            double w = MeasureParameters.L * 1e-3;
+
+            for (j = 0; j < steps; j++)
+            {
+                dist = (j + 1.0 - 0.5) * (1.0 / (double)(steps));
+                for (i = i; i < MainWindow.nacaProfile.Count - 1; i++)
+                {
+                    if (MainWindow.nacaProfile[i].Y <= 0 && MainWindow.nacaProfile[i + 1].Y < 0)
+                    {
+                        drove_distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+
+                        if (drove_distance >= dist * upper_distance)
+                        {
+                            Vector v = new Vector(MainWindow.nacaProfile[i].X - MainWindow.nacaProfile[i + 1].X,
+                                                    MainWindow.nacaProfile[i].Y - MainWindow.nacaProfile[i + 1].Y);
+                            v.Normalize();
+                            Vector n1 = new Vector(v.Y, -v.X);
+                            Vector n2 = new Vector(-v.Y, v.X);
+                            Vector n;
+
+                            v = Vector.Multiply(drove_distance - dist * lower_distance, v);
+                            pointTmp = new PointF((float)(MainWindow.nacaProfile[i + 1].X + v.X), (float)(MainWindow.nacaProfile[i + 1].Y + v.Y));
+
+                            if (MainWindow.GetDistanceBetween(new PointF((float)(pointTmp.X + n1.X), (float)(pointTmp.Y + n1.Y)), new PointF((float)0.5, (float)0.0)) <
+                                MainWindow.GetDistanceBetween(new PointF((float)(pointTmp.X + n2.X), (float)(pointTmp.Y + n2.Y)), new PointF((float)0.5, (float)0.0))
+                                )
+                                n = n1;
+                            else
+                                n = n2;
+
+                            //vecotr of 1m pointing inside
+                            n = Vector.Multiply(mm2px(1000), n);
+
+                            PointF nPoint = new PointF((float)(pointTmp.X + n.X), (float)(pointTmp.Y + n.Y));
+
+                            double dis = MainWindow.GetDistanceBetween(point1.Point, point2.Point);
+                            if (MainWindow.PercentRealLenght == 100)
+                                MainWindow.PercentRealLenght = 99.999f;
+                            dis = (dis / MainWindow.PercentRealLenght) * 100;
+
+                            pointTmp.X *= (float)dis;
+                            pointTmp.Y *= (float)dis;
+
+                            pointTmp = rotation_and_moving(pointTmp);
+                            n = rotation(n);
+                            Vector dTmp = new Vector((float)(EA.X - pointTmp.X), (float)(EA.Y - pointTmp.Y));
+
+                            double p_tmp = (p_lower((j - 0.5) * (1.0 / steps)) - MeasureParameters.p0);
+
+
+                            drag_force_l += p_tmp * px2mm(n.X) * 1e-3;
+                            lift_force_l += p_tmp * px2mm(n.Y) * 1e-3;
+                            M_l += px2mm(Math.Abs(Vector.CrossProduct(dTmp, n))) * 1e-3 * p_tmp;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            drag_force_l *= (1.0 / steps) * w * (1.0 / steps);
+            lift_force_l *= (1.0 / steps) * w * (1.0 / steps);
+            M_l *= (1.0 / steps) * w * (1.0 / steps);
+
+        }
+
+        private PointF rotation_and_moving(PointF p)
+        {
+            System.Windows.Vector v1 = new System.Windows.Vector(point1.Point.X - point2.Point.X, point1.Point.Y - point2.Point.Y);
+            System.Windows.Vector v2 = new System.Windows.Vector(1, 0);
+            double angleBetween = System.Windows.Vector.AngleBetween(v1, v2);
+            angleBetween = angleBetween * Math.PI / 180;
+
+            float sin = (float)Math.Sin(angleBetween);
+            float cos = (float)Math.Cos(angleBetween);
+
+            double xTmp, yTmp;
+
+            
+
+            xTmp = p.X * cos + p.Y * sin; //rotating
+            yTmp = -p.X * sin + p.Y * cos;
+            xTmp = xTmp + point1.Point.X; // mooving
+            yTmp = yTmp + point1.Point.Y;
+
+            return new PointF((float)xTmp, (float)yTmp);
+        }
+
+        private Vector rotation(Vector p)
+        {
+            System.Windows.Vector v1 = new System.Windows.Vector(point1.Point.X - point2.Point.X, point1.Point.Y - point2.Point.Y);
+            System.Windows.Vector v2 = new System.Windows.Vector(1, 0);
+            double angleBetween = System.Windows.Vector.AngleBetween(v1, v2);
+            angleBetween = angleBetween * Math.PI / 180;
+
+            float sin = (float)Math.Sin(angleBetween);
+            float cos = (float)Math.Cos(angleBetween);
+
+            double xTmp, yTmp;
+
+
+
+            xTmp = p.X * cos + p.Y * sin; //rotating
+            yTmp = -p.X * sin + p.Y * cos;
+
+            return new Vector((float)xTmp, (float)yTmp);
+        }
+
+
+        private double p_upper(double s)
+        {
+            int i;
+            double a = 0, b = 0;
+            int lastLine = listUpperLines.Count-1;
+            // ____l2(x2,y2)______s_______l1(x1,y2)_____
+            // p(s) = s*a+b
+            // y = ax+b
+            // a = (y2-y1)/(x2-x1)
+            // b = y1-x1a
+            if(surface_coor_by_point(listUpperLines[0].pointOnProfile.Point) > s)
+            {
+                a = (listDownerLines[0]._pressure - listUpperLines[0]._pressure)/(surface_coor_by_point(listDownerLines[0].pointOnProfile.Point) - surface_coor_by_point(listUpperLines[0].pointOnProfile.Point));
+                b = listUpperLines[0]._pressure - (surface_coor_by_point(listUpperLines[0].pointOnProfile.Point)*a);
+                return s*a+b;
+            }
+            if(surface_coor_by_point(listUpperLines[lastLine].pointOnProfile.Point) < s)
+            {
+                double x1 = 1.0;
+                double y1 = 0.0;
+                a = (listUpperLines[lastLine]._pressure - y1)/(surface_coor_by_point(listUpperLines[lastLine].pointOnProfile.Point) - x1);
+                b = y1 - (x1 * a);
+                return s*a+b;
+            }
+            for (i = 0; i < listUpperLines.Count - 1; i++)
+            {
+                if(surface_coor_by_point(listUpperLines[i].pointOnProfile.Point) < s && s < surface_coor_by_point(listUpperLines[i+1].pointOnProfile.Point))
+                {
+                    a = (listUpperLines[i]._pressure - listUpperLines[i + 1]._pressure) / (surface_coor_by_point(listUpperLines[i].pointOnProfile.Point) - surface_coor_by_point(listUpperLines[i + 1].pointOnProfile.Point));
+                    b = listUpperLines[i+1]._pressure - (surface_coor_by_point(listUpperLines[i+1].pointOnProfile.Point) * a);
+                    return s * a + b;
+                }
+            }
+            return 0;
+        }
+
+        private double p_lower(double s)
+        {
+            int i;
+            double a = 0, b = 0;
+            int lastLine = listDownerLines.Count - 1;
+            // ____l2(x2,y2)______s_______l1(x1,y2)_____
+            // p(s) = s*a+b
+            // y = ax+b
+            // a = (y2-y1)/(x2-x1)
+            // b = y1-x1a
+            if (surface_coor_by_point(listDownerLines[0].pointOnProfile.Point) > s)
+            {
+                a = (listUpperLines[0]._pressure - listDownerLines[0]._pressure) / (surface_coor_by_point(listUpperLines[0].pointOnProfile.Point) - surface_coor_by_point(listDownerLines[0].pointOnProfile.Point));
+                b = listDownerLines[0]._pressure - (surface_coor_by_point(listDownerLines[0].pointOnProfile.Point) * a);
+                return s * a + b;
+            }
+            if (surface_coor_by_point(listDownerLines[lastLine].pointOnProfile.Point) < s)
+            {
+                double x1 = 1;
+                double y1 = 0;
+                a = (listDownerLines[lastLine]._pressure - y1) / (surface_coor_by_point(listDownerLines[lastLine].pointOnProfile.Point) - x1);
+                b = y1 - (x1 * a);
+                return s * a + b;
+            }
+            for (i = 0; i < listDownerLines.Count - 1; i++)
+            {
+                if (surface_coor_by_point(listDownerLines[i].pointOnProfile.Point) < s && s < surface_coor_by_point(listDownerLines[i + 1].pointOnProfile.Point))
+                {
+                    a = (listDownerLines[i]._pressure - listDownerLines[i + 1]._pressure) / (surface_coor_by_point(listDownerLines[i].pointOnProfile.Point) - surface_coor_by_point(listDownerLines[i + 1].pointOnProfile.Point));
+                    b = listDownerLines[i + 1]._pressure - (surface_coor_by_point(listDownerLines[i + 1].pointOnProfile.Point) * a);
+                    return s * a + b;
+                }
+            }
+            return 0;
+        }
+
+        private double surface_coor_by_point(PointF p)
+        {
+            double ratio = MainWindow.GetDistanceBetween(point1.Point, point2.Point);
+            ratio = (ratio / MainWindow.PercentRealLenght) * 100;
+            p = funky_diana_rose(p);
+            PointF pointTmp = new PointF((float)(p.X / ratio), (float)(p.Y / ratio));
+            double distance = 0;
+            //get surface distance
+            int i;
+            double surfaceDist = 0;
+
+            for (i = 0; i < MainWindow.nacaProfile.Count - 1; i++)
+            {
+                if (MainWindow.nacaProfile[i].Y >= 0 && MainWindow.nacaProfile[i + 1].Y > 0 && p.Y > 0)
+                {
+                    if (MainWindow.nacaProfile[i].X < pointTmp.X && pointTmp.X < MainWindow.nacaProfile[i + 1].X)
+                    {
+                        distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], pointTmp);
+                        surfaceDist = distance / upper_distance;
+                        break;
+                    }
+                    distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+                }
+                else if (MainWindow.nacaProfile[i].Y <= 0 && MainWindow.nacaProfile[i + 1].Y < 0 && p.Y < 0)
+                {
+                    if (MainWindow.nacaProfile[i].X < pointTmp.X && pointTmp.X < MainWindow.nacaProfile[i + 1].X)
+                    {
+                        distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], pointTmp);
+                        surfaceDist = distance / lower_distance;
+                        break;
+                    }
+                    distance += MainWindow.GetDistanceBetween(MainWindow.nacaProfile[i], MainWindow.nacaProfile[i + 1]);
+                }
+            }
+
+            //sufraceDist *= (MainWindow.PercentRealLenght/100); 
+            if (pointTmp.X == 1)
+                surfaceDist = 1;
+            if (pointTmp.X == 0)
+                surfaceDist = 0;
+
+            return surfaceDist;
+        }
+
+        private PointF funky_diana_rose(PointF _p)
+        {
+            System.Windows.Vector v1 = new System.Windows.Vector(point2.Point.X - point1.Point.X, point2.Point.Y - point1.Point.Y);
+            System.Windows.Vector v2 = new System.Windows.Vector(_p.X - point1.Point.X, _p.Y - point1.Point.Y);
+
+            double distance = MainWindow.GetDistanceBetween(_p, point1.Point);
+            double angle = System.Windows.Vector.AngleBetween(v1, v2);
+
+            angle = angle * Math.PI / 180;
+
+            double y = Math.Sin(angle) * distance;
+            double x = Math.Cos(angle) * distance;
+
+            return new PointF((float)x, (float)y);
+        }
+
+        public void computate_DLM(ref PointF ea)
+        {
+            EA = ea;
+            if (Double.IsNaN(upper_distance) || Double.IsNaN(lower_distance))
+                upper_and_lower_distance(out upper_distance,out lower_distance);
+
+            iterate_upper_side(1000);
+            iterate_lower_side(1000);
+
+            drag_force = drag_force_l + drag_force_u;
+            lift_force = lift_force_l + lift_force_u;
+            M = M_l + M_u;
+        }
+
+        public void set_DML_NaN()
+        {
+            drag_force = Double.NaN; 
+            drag_force_u = Double.NaN; 
+            drag_force_l = Double.NaN; 
+            lift_force = Double.NaN; 
+            lift_force_u = Double.NaN; 
+            lift_force_l = Double.NaN; 
+            M = Double.NaN; 
+            M_u = Double.NaN; 
+            M_l = Double.NaN; 
+        }
+
+        public void test_to_compute_DLM(ref PointF ea)
+        {
+            if (this.listDownerLines.Count >= 2 && this.listUpperLines.Count >= 2)
+            {
+                foreach (Line l in this.listDownerLines)
+                    if (l.F_Index == String.Empty)
+                    {
+                        this.set_DML_NaN();
+                        return;
+                    }
+
+                foreach (Line l in this.listUpperLines)
+                    if (l.F_Index == String.Empty)
+                    {
+                        this.set_DML_NaN();
+                        return;
+                    }
+
+
+                this.computate_DLM(ref ea);
+                return;
+            }
+            this.set_DML_NaN();
+        }
+
+        private double px2mm(double px)
+        {
+            return Math.Round((px * (1 / GlobalSettings.ratio)), 3);
+        }
+        private double mm2px(double mm)
+        {
+            return Math.Round((mm * GlobalSettings.ratio), 3);
+        }
+
     }
+    
 }

@@ -22,8 +22,8 @@ namespace IFGPro
         static public int lineLength = 20;
 
         static public int roundTime = 4;
-        static public int roundPitch = 2;
-        static public int roundPlunge = 2;
+        static public int roundPitchPlunge = 2;
+        static public int roundOthers = 2;
 
         static public bool desc = true;
         static public bool points = true;

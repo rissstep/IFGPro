@@ -379,7 +379,7 @@
             this.flowLayoutPanel1.Controls.Add(this.panel5);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(24, 24);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(372, 129);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(420, 129);
             this.flowLayoutPanel1.TabIndex = 2;
             // 
             // panel2
@@ -394,14 +394,14 @@
             this.flowLayoutPanel1.SetFlowBreak(this.panel2, true);
             this.panel2.Location = new System.Drawing.Point(3, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(247, 25);
+            this.panel2.Size = new System.Drawing.Size(265, 25);
             this.panel2.TabIndex = 3;
             // 
             // label17
             // 
             this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(154, 5);
+            this.label17.Location = new System.Drawing.Point(172, 5);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(35, 13);
             this.label17.TabIndex = 10;
@@ -411,7 +411,7 @@
             // 
             this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(85, 5);
+            this.label16.Location = new System.Drawing.Point(103, 5);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(33, 13);
             this.label16.TabIndex = 9;
@@ -421,7 +421,7 @@
             // 
             this.cb_cross.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cb_cross.FormattingEnabled = true;
-            this.cb_cross.Location = new System.Drawing.Point(193, 2);
+            this.cb_cross.Location = new System.Drawing.Point(211, 2);
             this.cb_cross.Margin = new System.Windows.Forms.Padding(2);
             this.cb_cross.Name = "cb_cross";
             this.cb_cross.Size = new System.Drawing.Size(47, 21);
@@ -433,7 +433,7 @@
             this.btn_cross.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_cross.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_cross.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btn_cross.Location = new System.Drawing.Point(122, 2);
+            this.btn_cross.Location = new System.Drawing.Point(140, 2);
             this.btn_cross.Name = "btn_cross";
             this.btn_cross.Size = new System.Drawing.Size(28, 20);
             this.btn_cross.TabIndex = 2;
@@ -462,14 +462,14 @@
             this.flowLayoutPanel1.SetFlowBreak(this.panel3, true);
             this.panel3.Location = new System.Drawing.Point(3, 34);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(247, 25);
+            this.panel3.Size = new System.Drawing.Size(265, 25);
             this.panel3.TabIndex = 4;
             // 
             // label21
             // 
             this.label21.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(154, 5);
+            this.label21.Location = new System.Drawing.Point(172, 5);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(35, 13);
             this.label21.TabIndex = 11;
@@ -479,7 +479,7 @@
             // 
             this.label18.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(85, 5);
+            this.label18.Location = new System.Drawing.Point(103, 5);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(33, 13);
             this.label18.TabIndex = 10;
@@ -489,7 +489,7 @@
             // 
             this.cb_profil.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cb_profil.FormattingEnabled = true;
-            this.cb_profil.Location = new System.Drawing.Point(194, 2);
+            this.cb_profil.Location = new System.Drawing.Point(212, 2);
             this.cb_profil.Margin = new System.Windows.Forms.Padding(2);
             this.cb_profil.Name = "cb_profil";
             this.cb_profil.Size = new System.Drawing.Size(47, 21);
@@ -501,7 +501,7 @@
             this.btn_profil.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_profil.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_profil.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btn_profil.Location = new System.Drawing.Point(122, 2);
+            this.btn_profil.Location = new System.Drawing.Point(140, 2);
             this.btn_profil.Name = "btn_profil";
             this.btn_profil.Size = new System.Drawing.Size(28, 20);
             this.btn_profil.TabIndex = 4;
@@ -533,14 +533,14 @@
             this.flowLayoutPanel1.SetFlowBreak(this.panel4, true);
             this.panel4.Location = new System.Drawing.Point(3, 65);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(366, 25);
+            this.panel4.Size = new System.Drawing.Size(384, 25);
             this.panel4.TabIndex = 4;
             // 
             // label24
             // 
             this.label24.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(332, 6);
+            this.label24.Location = new System.Drawing.Point(350, 6);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(24, 13);
             this.label24.TabIndex = 15;
@@ -549,7 +549,7 @@
             // tb_length
             // 
             this.tb_length.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.tb_length.Location = new System.Drawing.Point(288, 3);
+            this.tb_length.Location = new System.Drawing.Point(306, 3);
             this.tb_length.Name = "tb_length";
             this.tb_length.Size = new System.Drawing.Size(43, 20);
             this.tb_length.TabIndex = 14;
@@ -559,7 +559,7 @@
             // 
             this.label23.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(246, 6);
+            this.label23.Location = new System.Drawing.Point(264, 6);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(39, 13);
             this.label23.TabIndex = 13;
@@ -569,7 +569,7 @@
             // 
             this.label22.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(154, 5);
+            this.label22.Location = new System.Drawing.Point(172, 5);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(35, 13);
             this.label22.TabIndex = 12;
@@ -579,7 +579,7 @@
             // 
             this.label19.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(85, 5);
+            this.label19.Location = new System.Drawing.Point(103, 5);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(33, 13);
             this.label19.TabIndex = 10;
@@ -589,7 +589,7 @@
             // 
             this.cb_lines.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cb_lines.FormattingEnabled = true;
-            this.cb_lines.Location = new System.Drawing.Point(194, 2);
+            this.cb_lines.Location = new System.Drawing.Point(212, 2);
             this.cb_lines.Margin = new System.Windows.Forms.Padding(2);
             this.cb_lines.Name = "cb_lines";
             this.cb_lines.Size = new System.Drawing.Size(47, 21);
@@ -602,16 +602,16 @@
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.label4.Location = new System.Drawing.Point(2, 5);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(77, 16);
+            this.label4.Size = new System.Drawing.Size(96, 16);
             this.label4.TabIndex = 1;
-            this.label4.Text = "Fringe lines";
+            this.label4.Text = "Fringe position";
             // 
             // btn_lines
             // 
             this.btn_lines.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_lines.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_lines.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btn_lines.Location = new System.Drawing.Point(122, 2);
+            this.btn_lines.Location = new System.Drawing.Point(140, 2);
             this.btn_lines.Name = "btn_lines";
             this.btn_lines.Size = new System.Drawing.Size(28, 20);
             this.btn_lines.TabIndex = 6;
@@ -628,14 +628,14 @@
             this.flowLayoutPanel1.SetFlowBreak(this.panel5, true);
             this.panel5.Location = new System.Drawing.Point(3, 96);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(247, 25);
+            this.panel5.Size = new System.Drawing.Size(265, 25);
             this.panel5.TabIndex = 4;
             // 
             // label20
             // 
             this.label20.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(85, 5);
+            this.label20.Location = new System.Drawing.Point(103, 5);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(33, 13);
             this.label20.TabIndex = 10;
@@ -656,7 +656,7 @@
             this.btn_selected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_selected.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_selected.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btn_selected.Location = new System.Drawing.Point(122, 2);
+            this.btn_selected.Location = new System.Drawing.Point(140, 2);
             this.btn_selected.Name = "btn_selected";
             this.btn_selected.Size = new System.Drawing.Size(28, 20);
             this.btn_selected.TabIndex = 8;
@@ -923,9 +923,9 @@
             this.cb__lines.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cb__lines.Location = new System.Drawing.Point(3, 72);
             this.cb__lines.Name = "cb__lines";
-            this.cb__lines.Size = new System.Drawing.Size(51, 17);
+            this.cb__lines.Size = new System.Drawing.Size(79, 17);
             this.cb__lines.TabIndex = 3;
-            this.cb__lines.Text = "Lines";
+            this.cb__lines.Text = "Fringe lines";
             this.cb__lines.UseVisualStyleBackColor = true;
             this.cb__lines.CheckedChanged += new System.EventHandler(this.cb_description_CheckedChanged);
             // 
@@ -936,9 +936,9 @@
             this.cb_lines_index.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cb_lines_index.Location = new System.Drawing.Point(3, 95);
             this.cb_lines_index.Name = "cb_lines_index";
-            this.cb_lines_index.Size = new System.Drawing.Size(74, 17);
+            this.cb_lines_index.Size = new System.Drawing.Size(99, 17);
             this.cb_lines_index.TabIndex = 4;
-            this.cb_lines_index.Text = "Line index";
+            this.cb_lines_index.Text = "Fringe positions";
             this.cb_lines_index.UseVisualStyleBackColor = true;
             this.cb_lines_index.CheckedChanged += new System.EventHandler(this.cb_description_CheckedChanged);
             // 
@@ -1023,7 +1023,7 @@
             this.flowLayoutPanel4.Controls.Add(this.panel11);
             this.flowLayoutPanel4.Location = new System.Drawing.Point(24, 24);
             this.flowLayoutPanel4.Name = "flowLayoutPanel4";
-            this.flowLayoutPanel4.Size = new System.Drawing.Size(133, 95);
+            this.flowLayoutPanel4.Size = new System.Drawing.Size(294, 95);
             this.flowLayoutPanel4.TabIndex = 2;
             // 
             // panel9
@@ -1035,12 +1035,12 @@
             this.flowLayoutPanel4.SetFlowBreak(this.panel9, true);
             this.panel9.Location = new System.Drawing.Point(3, 3);
             this.panel9.Name = "panel9";
-            this.panel9.Size = new System.Drawing.Size(125, 25);
+            this.panel9.Size = new System.Drawing.Size(290, 25);
             this.panel9.TabIndex = 4;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(81, 3);
+            this.textBox1.Location = new System.Drawing.Point(244, 3);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(41, 20);
             this.textBox1.TabIndex = 2;
@@ -1053,9 +1053,9 @@
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(2, 5);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(44, 13);
+            this.label12.Size = new System.Drawing.Size(30, 13);
             this.label12.TabIndex = 1;
-            this.label12.Text = "Time [s]";
+            this.label12.Text = "Time";
             // 
             // panel10
             // 
@@ -1066,12 +1066,12 @@
             this.flowLayoutPanel4.SetFlowBreak(this.panel10, true);
             this.panel10.Location = new System.Drawing.Point(3, 34);
             this.panel10.Name = "panel10";
-            this.panel10.Size = new System.Drawing.Size(125, 25);
+            this.panel10.Size = new System.Drawing.Size(290, 25);
             this.panel10.TabIndex = 5;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(81, 3);
+            this.textBox2.Location = new System.Drawing.Point(244, 3);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(41, 20);
             this.textBox2.TabIndex = 2;
@@ -1084,9 +1084,9 @@
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(2, 5);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(58, 13);
+            this.label13.Size = new System.Drawing.Size(69, 13);
             this.label13.TabIndex = 1;
-            this.label13.Text = "Pitch [deg]";
+            this.label13.Text = "Pitch, plunge";
             // 
             // panel11
             // 
@@ -1097,12 +1097,12 @@
             this.flowLayoutPanel4.SetFlowBreak(this.panel11, true);
             this.panel11.Location = new System.Drawing.Point(3, 65);
             this.panel11.Name = "panel11";
-            this.panel11.Size = new System.Drawing.Size(125, 25);
+            this.panel11.Size = new System.Drawing.Size(290, 25);
             this.panel11.TabIndex = 5;
             // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(81, 3);
+            this.textBox3.Location = new System.Drawing.Point(244, 3);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(41, 20);
             this.textBox3.TabIndex = 2;
@@ -1115,9 +1115,9 @@
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(2, 5);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(65, 13);
+            this.label14.Size = new System.Drawing.Size(233, 13);
             this.label14.TabIndex = 1;
-            this.label14.Text = "Plunge [mm]";
+            this.label14.Text = "Surface coord, pressure, mach, velocity, density";
             // 
             // label11
             // 

@@ -24,7 +24,7 @@ namespace IFGPro
 {
     internal partial class  MainWindow : Form
     {
-        private string formName = "IFGPro 0.93beta - ";
+        private string formName = "IFGPro 1.0 - ";
         #region Variableeees
         //Project name
         public string projectName;
@@ -48,6 +48,11 @@ namespace IFGPro
         Bitmap image;
         //bw for switching pictures
         public BackgroundWorker bw = new BackgroundWorker();
+        //bw for computation DML
+        public BackgroundWorker bw_c = new BackgroundWorker();
+        public MyImage tmp_img = null;
+        public bool computation_is_going = false;
+        public bool bw_c_need_to_compute = false;
         //if picture sequence is playing
         private Boolean isPlaying = false;
         //click control
@@ -104,6 +109,8 @@ namespace IFGPro
         Image<Gray, Byte> image_for_emgu;
         //graphics width
         static public float graphicsWidth;
+        //object to redrawing 
+        //Font fontPoints;
         #endregion
 
         public MainWindow()
@@ -120,6 +127,7 @@ namespace IFGPro
             {
                 MessageBox.Show(e.Message);
             }
+
             
 
             toolTip1.SetToolTip(this.toNext, "[E]");
@@ -132,6 +140,8 @@ namespace IFGPro
             
             bw.DoWork += new DoWorkEventHandler(bw_LoadImage);
             bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_LoadingCompleted);
+            bw_c.DoWork += new DoWorkEventHandler(bw_calculate);
+            bw_c.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_calculation_complete);
 
             tabControl1.SelectedIndex = 0;
 
@@ -141,6 +151,7 @@ namespace IFGPro
             //calibrate moving profile
             calibrateProfilePoint1 = new Mark(6, Color.Red);
             calibrateProfilePoint2 = new Mark(6, Color.Red);
+
             
         }
 
@@ -148,6 +159,8 @@ namespace IFGPro
 
         private void loadImage_Click(object sender, EventArgs e)
         {
+
+            
             if(images.countImages != 0)
                 if (!SureClose("Unsaved data will be lost, do you want to create new project?", "Warning"))
                     return;
@@ -503,6 +516,7 @@ namespace IFGPro
                 }
                 images.getActual().setLine(selectedLine, imageBox.PointToImage(e.Location));
                 imageBox.Invalidate();
+                return;
             }
             else if (isSelected.Equals("point1") && isMouseDown)
             {
@@ -656,15 +670,17 @@ namespace IFGPro
             {
                 if (selectedLine != null)
                     selectedLine.Sur_Coor = images.getActual().GetSurfaceCoor(selectedLine);
+                
                 //selectedLine = null;
                 //isSelected = String.Empty;
                 imageBox.AutoPan = true;
                 imageBox.MouseMove -= imageBox_MouseMove;
-                //setDataGrids();
                 imageBox.Invalidate();
 
                 dataGridUpper.Update();
                 dataGridDowner.Update();
+
+                call_bw_c();
             }
             else if (isSelected.Equals("EA") || isSelected.Equals("point1") || isSelected.Equals("point2"))
             {
@@ -796,16 +812,17 @@ namespace IFGPro
                 {
                     if ((dataGridUpper.RowCount - 1) == dataGridUpper.SelectedRows[0].Index)
                     {
-                        DataGridViewCell cell = dataGridUpper.Rows[0].Cells[3];
+                        DataGridViewCell cell = dataGridUpper.Rows[0].Cells[2];
                         dataGridUpper.CurrentCell = cell;
                         dataGridUpper.BeginEdit(true);
                     }
                     else
                     {
-                        DataGridViewCell cell = dataGridUpper.Rows[dataGridUpper.SelectedRows[0].Index + 1].Cells[3];
+                        DataGridViewCell cell = dataGridUpper.Rows[dataGridUpper.SelectedRows[0].Index + 1].Cells[2];
                         dataGridUpper.CurrentCell = cell;
                         dataGridUpper.BeginEdit(true);
                     }
+
                     return true;
                 }
 
@@ -813,13 +830,13 @@ namespace IFGPro
                 {
                     if ((dataGridDowner.RowCount - 1) == dataGridDowner.SelectedRows[0].Index)
                     {
-                        DataGridViewCell cell = dataGridDowner.Rows[0].Cells[3];
+                        DataGridViewCell cell = dataGridDowner.Rows[0].Cells[2];
                         dataGridDowner.CurrentCell = cell;
                         dataGridDowner.BeginEdit(true);
                     }
                     else
                     {
-                        DataGridViewCell cell = dataGridDowner.Rows[dataGridDowner.SelectedRows[0].Index + 1].Cells[3];
+                        DataGridViewCell cell = dataGridDowner.Rows[dataGridDowner.SelectedRows[0].Index + 1].Cells[2];
                         dataGridDowner.CurrentCell = cell;
                         dataGridDowner.BeginEdit(true);
                     }
@@ -886,7 +903,9 @@ namespace IFGPro
                     images.getActual().sortLines();
                     setDataGrids();
 
-                    isSelected = String.Empty; ;
+                    isSelected = String.Empty;
+
+                    call_bw_c();
                 }
                 if (dataGridDowner.SelectedRows.Count > 0)
                 {
@@ -898,7 +917,9 @@ namespace IFGPro
                     images.getActual().sortLines();
                     setDataGrids();
 
-                    isSelected = String.Empty; ;
+                    isSelected = String.Empty;
+
+                    call_bw_c();
                 }
             }
             if (tabControl1.SelectedTab.Equals(tabAnalyze))
@@ -1281,18 +1302,18 @@ namespace IFGPro
 
                 imageBox.ResumeLayout();
                 
-                if (!isPlaying)
-                {
-                    UpdateStatusBar();
-                }
+                //if (!isPlaying)
+                //{
+                //    UpdateStatusBar();
+                //}
 
             }
         }
         private void DrawGraphics(Graphics e)
         {
 
-            GlobalSettings.profilPen.DashCap = System.Drawing.Drawing2D.DashCap.Round;
-            e.SmoothingMode = SmoothingMode.AntiAlias;
+            //GlobalSettings.profilPen.DashCap = System.Drawing.Drawing2D.DashCap.Round;
+            //e.SmoothingMode = SmoothingMode.AntiAlias;
             //e.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 
             //Cross 
@@ -1492,37 +1513,39 @@ namespace IFGPro
                 }
                 if (!(images.getActual().listLines.Count == 0) )
                 {
-                    foreach (Line l in images.getActual().listLines)
+                    if (GlobalSettings.lines)
                     {
-                        if (GlobalSettings.lines)
+                        foreach (Line l in images.getActual().listLines)
                         {
-                            if (l.Equals(selectedLine))
-                                e.DrawLine(GlobalSettings.selectedPen,
-                                    imageBox.GetOffsetPoint(l.pointOfProfile.Point),
-                                    imageBox.GetOffsetPoint(l.pointOnProfile.Point));
-                            else
-                                e.DrawLine(GlobalSettings.linesPen,
-                                    imageBox.GetOffsetPoint(l.pointOfProfile.Point),
-                                    imageBox.GetOffsetPoint(l.pointOnProfile.Point));
-                        }
+                        
+                                if (l.Equals(selectedLine))
+                                    e.DrawLine(GlobalSettings.selectedPen,
+                                        imageBox.GetOffsetPoint(l.pointOfProfile.Point),
+                                        imageBox.GetOffsetPoint(l.pointOnProfile.Point));
+                                else
+                                    e.DrawLine(GlobalSettings.linesPen,
+                                        imageBox.GetOffsetPoint(l.pointOfProfile.Point),
+                                        imageBox.GetOffsetPoint(l.pointOnProfile.Point));
+                        
 
-                        if (GlobalSettings.linesDesc && GlobalSettings.lineFringeNumber )
-                        {
-                            if (String.IsNullOrWhiteSpace(l.F_Index))
-                                e.DrawString(l.Index.ToString(), GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
-                            else
-                                e.DrawString(l.Index.ToString() + "/" + l.F_Index, GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox,e));
+                            if (GlobalSettings.linesDesc && GlobalSettings.lineFringeNumber)
+                            {
+                                if (String.IsNullOrWhiteSpace(l.F_Index))
+                                    e.DrawString(l.Index.ToString(), GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
+                                else
+                                    e.DrawString(l.F_Index.ToString() + "/" + l.Index, GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
+                            }
+                            else if (GlobalSettings.linesDesc && !GlobalSettings.lineFringeNumber)
+                            {
+                                e.DrawString("/" + l.Index.ToString(), GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
+                            }
+                            else if (!GlobalSettings.linesDesc && GlobalSettings.lineFringeNumber)
+                            {
+                                if (!String.IsNullOrWhiteSpace(l.F_Index))
+                                    e.DrawString(l.F_Index, GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
+                            }
+
                         }
-                        else if (GlobalSettings.linesDesc && !GlobalSettings.lineFringeNumber)
-                        {
-                            e.DrawString(l.Index.ToString(), GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
-                        }
-                        else if (!GlobalSettings.linesDesc && GlobalSettings.lineFringeNumber)
-                        {
-                            if (!String.IsNullOrWhiteSpace(l.F_Index))
-                                e.DrawString("/" + l.F_Index, GlobalSettings.fontLines, GlobalSettings.indexBrush.Brush, l.LocationIndex(imageBox, e));
-                        }
-                            
                     }
                 }
             }
@@ -2002,7 +2025,7 @@ namespace IFGPro
         {
             if (GetElasticAxis() == null)
             {
-                MessageBox.Show("Define EA axis you foool!!!");
+                MessageBox.Show("Define EA axis");
                 return;
             }
 
@@ -2021,7 +2044,8 @@ namespace IFGPro
                 isNotNumeric(tb_p0.Text) ||
                 isNotNumeric(tb_tau0.Text) ||
                 isNotNumeric(tb_dTau.Text) ||
-                isNotNumeric(tb_w0.Text))
+                isNotNumeric(tb_w0.Text) ||
+                isNotNumeric(tb_mach.Text))
             {
                 MessageBox.Show("Some invalid parameter");
             }
@@ -2116,8 +2140,8 @@ namespace IFGPro
             dataGridUpper.Columns[0].Visible = false;
             dataGridUpper.Columns[1].Visible = false;
 
-            dataGridUpper.Columns[2].HeaderText = "Fringe position";
-            dataGridUpper.Columns[3].HeaderText = "Fringe number";
+            dataGridUpper.Columns[2].HeaderText = "Fringe number";
+            dataGridUpper.Columns[3].HeaderText = "Fringe position";
             dataGridUpper.Columns[4].HeaderText = "Surface coor";
             dataGridUpper.Columns[5].HeaderText = "Pressure [kPa]";
             dataGridUpper.Columns[6].HeaderText = "Mach [1]";
@@ -2127,8 +2151,8 @@ namespace IFGPro
             dataGridDowner.Columns[0].Visible = false;
             dataGridDowner.Columns[1].Visible = false;
 
-            dataGridDowner.Columns[2].HeaderText = "Fringe position";
-            dataGridDowner.Columns[3].HeaderText = "Fringe number";
+            dataGridDowner.Columns[2].HeaderText = "Fringe number";
+            dataGridDowner.Columns[3].HeaderText = "Fringe position";
             dataGridDowner.Columns[4].HeaderText = "Surface coor";
             dataGridDowner.Columns[5].HeaderText = "Pressure [kPa]";
             dataGridDowner.Columns[6].HeaderText = "Mach [1]";
@@ -2145,7 +2169,7 @@ namespace IFGPro
             dataGridUpper.ClearSelection();
             dataGridDowner.DataSource = images.getActual().listDownerLines;
             dataGridDowner.ClearSelection();
-
+            
 
             dataGridUpper.Refresh();
             dataGridDowner.Refresh();
@@ -2200,7 +2224,7 @@ namespace IFGPro
         }
         private void editCellUp(int index, bool upper)
         {
-            DataGridViewCell cell = dataGridUpper.Rows[index].Cells[3];
+            DataGridViewCell cell = dataGridUpper.Rows[index].Cells[2];
             dataGridUpper.CurrentCell = cell;
             dataGridUpper.BeginEdit(true);
         }
@@ -2213,7 +2237,7 @@ namespace IFGPro
         }
         private void editCellDown(int index, bool upper)
         {
-            DataGridViewCell cell = dataGridDowner.Rows[index].Cells[3];
+            DataGridViewCell cell = dataGridDowner.Rows[index].Cells[2];
             dataGridDowner.CurrentCell = cell;
             dataGridDowner.BeginEdit(true);
         }
@@ -2225,6 +2249,14 @@ namespace IFGPro
         {
             images.getActual().description = tb_description.Text;
             imageBox.Invalidate();
+        }
+        private void dataGridUpper_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            call_bw_c();
+        }
+        private void dataGridDowner_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            call_bw_c();
         }
 
     #endregion
@@ -2350,6 +2382,7 @@ namespace IFGPro
                 tb_dTau.Text = mages.dTau.ToString(CultureInfo.CreateSpecificCulture("en-GB"));
                 tb_tau0.Text = mages.tau0.ToString(CultureInfo.CreateSpecificCulture("en-GB"));
                 tb_t0.Text = mages.t0.ToString(CultureInfo.CreateSpecificCulture("en-GB"));
+                tb_mach.Text = mages.M.ToString(CultureInfo.CreateSpecificCulture("en-GB"));
 
                 A = mages.A;
                 B = mages.B;
@@ -2466,7 +2499,7 @@ namespace IFGPro
                 if (image.listUpperLines.Count != 0)
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(export_path + @"\Upper surface\" + Path.GetFileNameWithoutExtension(image.name) + ".txt"))
                     {
-                        file.WriteLine("Marker\tSurface coordinate\tFringe index\tPressure\tMach\tVelocity\tDensity");
+                        file.WriteLine("Fringe number\tFringe position\tSurface coordinate\tPressure [Pa]\tMach [1]\tVelocity [m/s]\tDensity [kg/m³]");
                         foreach (Line line in image.listUpperLines)
                         {
                             file.WriteLine(line.ToString());
@@ -2475,7 +2508,7 @@ namespace IFGPro
                 if (image.listDownerLines.Count != 0)
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(export_path + @"\Lower surface\" + Path.GetFileNameWithoutExtension(image.name) + ".txt"))
                     {
-                        file.WriteLine("Marker\tSurface coordinate\tFringe index\tPressure\tMach\tVelocity\tDensity");
+                        file.WriteLine("Fringe number\tFringe position\tSurface coordinate\tPressure [Pa]\tMach [1]\tVelocity [m/s]\tDensity [kg/m³]");
                         foreach (Line line in image.listDownerLines)
                         {
                             file.WriteLine(line.ToString());
@@ -2577,6 +2610,37 @@ namespace IFGPro
             else
                 setDataGrids();
         }
+
+        private void bw_calculate(object sender, DoWorkEventArgs e)
+        {
+            tmp_img = images.getActual();
+            computation_is_going = true;
+            images.getActual().test_to_compute_DLM(ref GetElasticAxis().location);
+        }
+        private void bw_calculation_complete(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (tmp_img.Equals(images.getActual()) && !bw_c_need_to_compute)
+            {
+                computation_is_going = false;
+                UpdateStatusBar(); 
+            }
+            else
+            {
+                bw_c.RunWorkerAsync();
+                bw_c_need_to_compute = false;
+            }
+                
+        }
+
+        private void call_bw_c()
+        {
+            if (bw_c.IsBusy)
+            {
+                bw_c_need_to_compute = true;
+                return;
+            }
+            bw_c.RunWorkerAsync();
+        }
         #endregion
 
         #region Buttons for player
@@ -2675,6 +2739,37 @@ namespace IFGPro
                 images.getActual().time = MeasureParameters.tau0 + (images.getPosition() - 1) * MeasureParameters.dTau;
                 l_time.Text = (Math.Round(images.getActual().time, 4)).ToString();
 
+            }
+
+            if (!Double.IsNaN(images.getActual().drag_force) && !computation_is_going)
+            {
+                int round = 3;
+                l_D_l.Text = Math.Round(images.getActual().drag_force_l, round).ToString();
+                l_D_u.Text = Math.Round(images.getActual().drag_force_u, round).ToString();
+                l_D.Text = Math.Round(images.getActual().drag_force, round).ToString();
+
+                l_L_l.Text = Math.Round(images.getActual().lift_force_l, round).ToString();
+                l_L_u.Text = Math.Round(images.getActual().lift_force_u, round).ToString();
+                l_L.Text = Math.Round(images.getActual().lift_force, round).ToString();
+
+                l_M_l.Text = Math.Round(images.getActual().M_l, round).ToString();
+                l_M_u.Text = Math.Round(images.getActual().M_u, round).ToString();
+                l_M.Text = Math.Round(images.getActual().M, round).ToString();
+                
+            }
+            else
+            {
+                l_D_l.Text = "NaN";
+                l_D_u.Text = "NaN";
+                l_D.Text = "NaN";
+
+                l_L_l.Text = "NaN";
+                l_L_u.Text = "NaN";
+                l_L.Text = "NaN";
+
+                l_M_l.Text = "NaN";
+                l_M_u.Text = "NaN";
+                l_M.Text = "NaN";
             }
 
         }
@@ -3027,8 +3122,8 @@ namespace IFGPro
                 file.WriteLine(GlobalSettings.profil.ToString());
 
                 file.WriteLine(GlobalSettings.roundTime.ToString());
-                file.WriteLine(GlobalSettings.roundPitch.ToString());
-                file.WriteLine(GlobalSettings.roundPlunge.ToString());
+                file.WriteLine(GlobalSettings.roundPitchPlunge.ToString());
+                file.WriteLine(GlobalSettings.roundOthers.ToString());
 
                 file.WriteLine(GlobalSettings.fringeLabels.ToString());
                 file.WriteLine(GlobalSettings.fringeLabelsPanel.ToString());
@@ -3077,8 +3172,8 @@ namespace IFGPro
                     GlobalSettings.profil = string2bool(file.ReadLine());
 
                     GlobalSettings.roundTime = int.Parse(file.ReadLine());
-                    GlobalSettings.roundPitch = int.Parse(file.ReadLine());
-                    GlobalSettings.roundPlunge = int.Parse(file.ReadLine());
+                    GlobalSettings.roundPitchPlunge = int.Parse(file.ReadLine());
+                    GlobalSettings.roundOthers = int.Parse(file.ReadLine());
 
                     GlobalSettings.fringeLabels = string2bool(file.ReadLine());
                     GlobalSettings.fringeLabelsPanel = string2bool(file.ReadLine());
@@ -3499,8 +3594,10 @@ namespace IFGPro
 
         #endregion       
 
-       
-
-        
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            images.getActual().computate_DLM(ref GetElasticAxis().location);
+        }
+                       
     }   
 }
