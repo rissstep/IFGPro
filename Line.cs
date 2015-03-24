@@ -31,7 +31,7 @@ namespace IFGPro
         private double _velocity = 0;
         private double _density = 0;
         private double _mach = 0;
-        private double _sur_coor = 0;
+        public double _sur_coor = 0;
 
         public const double pi4 = Math.PI/4;
         public const double pi2 = Math.PI / 2;

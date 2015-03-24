@@ -142,6 +142,7 @@ namespace IFGPro
             bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_LoadingCompleted);
             bw_c.DoWork += new DoWorkEventHandler(bw_calculate);
             bw_c.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_calculation_complete);
+            
 
             tabControl1.SelectedIndex = 0;
 
@@ -185,11 +186,11 @@ namespace IFGPro
                     this.Text = formName + od.name;
                     projectName = od.name;
                     //calibrate Points
-                    calibratePoint1 = new Mark(6, Color.Red);
-                    calibratePoint2 = new Mark(6, Color.Red);
+                    calibratePoint1 = new Mark(9, Color.Red);
+                    calibratePoint2 = new Mark(9, Color.Red);
                     //calibrate moving profile
-                    calibrateProfilePoint1 = new Mark(6, Color.Red);
-                    calibrateProfilePoint2 = new Mark(6, Color.Red);
+                    calibrateProfilePoint1 = new Mark(9, Color.Red);
+                    calibrateProfilePoint2 = new Mark(9, Color.Red);
 
                     //Physical points
                     listFixedInImage = new List<ImagePoint>();
@@ -689,6 +690,7 @@ namespace IFGPro
                 imageBox.MouseMove -= imageBox_MouseMove;
                 setDataGrids();
                 imageBox.Invalidate();
+                call_bw_c();
             }
             else if (isSelected.Equals("description"))
             {
@@ -710,6 +712,7 @@ namespace IFGPro
                 imageBox.AutoPan = true;
                 imageBox.MouseMove -= imageBox_MouseMove;
                 imageBox.Invalidate();
+                call_bw_c();
             }
             else if (isSelected.Equals("Ilabel"))
             {
@@ -897,29 +900,31 @@ namespace IFGPro
                 {
                     int i = dataGridUpper.SelectedRows[0].Index;
                     //dataGridUpper.DataSource = null;
-                    images.getActual().listUpperLines[i].MakeRestorePoint();
+                    //images.getActual().listUpperLines[i].MakeRestorePoint();
                     images.getActual().listLines.Remove(images.getActual().listUpperLines[i]);
                     images.getActual().listUpperLines.RemoveAt(i);
                     images.getActual().sortLines();
                     setDataGrids();
 
                     isSelected = String.Empty;
-
+                    GC.Collect();
+                    
                     call_bw_c();
+                    return base.ProcessCmdKey(ref msg, keyData);
                 }
                 if (dataGridDowner.SelectedRows.Count > 0)
                 {
                     int i = dataGridDowner.SelectedRows[0].Index;
                     //dataGridDowner.DataSource = null;
-                    images.getActual().listDownerLines[i].MakeRestorePoint();
+                    //images.getActual().listDownerLines[i].MakeRestorePoint();
                     images.getActual().listLines.Remove(images.getActual().listDownerLines[i]);
                     images.getActual().listDownerLines.RemoveAt(i);
                     images.getActual().sortLines();
                     setDataGrids();
-
                     isSelected = String.Empty;
-
+                    GC.Collect();
                     call_bw_c();
+                    return base.ProcessCmdKey(ref msg, keyData);
                 }
             }
             if (tabControl1.SelectedTab.Equals(tabAnalyze))
@@ -1312,8 +1317,8 @@ namespace IFGPro
         private void DrawGraphics(Graphics e)
         {
 
-            //GlobalSettings.profilPen.DashCap = System.Drawing.Drawing2D.DashCap.Round;
-            //e.SmoothingMode = SmoothingMode.AntiAlias;
+            GlobalSettings.profilPen.DashCap = System.Drawing.Drawing2D.DashCap.Round;
+            e.SmoothingMode = SmoothingMode.AntiAlias;
             //e.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 
             //Cross 
@@ -1609,7 +1614,6 @@ namespace IFGPro
 
         #region Events of AIRFOIL tab
             //Clicing for calibration
-            
             private void tb_ideal_legth_KeyPress(object sender, KeyPressEventArgs e)
             {
                 if (!char.IsControl(e.KeyChar)
@@ -2414,7 +2418,10 @@ namespace IFGPro
                 tb_w0.Text = px2mm(mages.w0).ToString(CultureInfo.CreateSpecificCulture("en-GB"));
 
                 string new_path = Path.GetDirectoryName(openFileDialog1.FileName);
-                path = new_path + "\\" + images.imagesList[0].name;
+                foreach (MyImage im in images.imagesList)
+                {
+                    im.path = new_path + "\\" + im.name;
+                }
 
                 if (!isInit)
                 {
@@ -2445,15 +2452,19 @@ namespace IFGPro
                 foreach (MyImage im in images.imagesList)
                 {
                     im.path = new_path + "\\" + im.name;
+                    im.test_to_compute_DLM(ref im.EA);
                     im.setPoint1(im.point1.Point);
                 }
                 
 
                 if (images.imagesList != null)
+                {
                     foreach (Line l in images.getActual().listLines)
                     {
                         images.getActual().setLine(l, l.pointOfProfile.Point);
                     }
+                }
+                    
 
                 imageBox.Invalidate();
                 setDataGrids();
@@ -2479,13 +2490,13 @@ namespace IFGPro
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(export_path + @"\"+projectName+".txt"))
             {
                 int inc=0;
-                file.WriteLine("Index\tName\tTime\tPitch\tPlunge");
+                file.WriteLine("Index\tName\tTime\tPitch\tPlunge\tDrag force\tLift force\tMoment");
                 foreach (MyImage image in images.imagesList)
                 {
                     if (image.point1.Point == Point.Empty || image.point2.Point == Point.Empty)
                         continue;
 
-                    if(image.time != 0)
+                    //if(image.time != 0)
                         file.WriteLine(inc.ToString()+"\t"+image.ToString());
                     inc++;
                 }
@@ -2613,9 +2624,17 @@ namespace IFGPro
 
         private void bw_calculate(object sender, DoWorkEventArgs e)
         {
-            tmp_img = images.getActual();
-            computation_is_going = true;
-            images.getActual().test_to_compute_DLM(ref GetElasticAxis().location);
+            try
+            {
+                tmp_img = images.getActual();
+                computation_is_going = true;
+                images.getActual().test_to_compute_DLM(ref GetElasticAxis().location);
+            }
+            catch (Exception er)
+            {
+                throw er;
+            }
+            
         }
         private void bw_calculation_complete(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -2743,18 +2762,18 @@ namespace IFGPro
 
             if (!Double.IsNaN(images.getActual().drag_force) && !computation_is_going)
             {
-                int round = 3;
-                l_D_l.Text = Math.Round(images.getActual().drag_force_l, round).ToString();
-                l_D_u.Text = Math.Round(images.getActual().drag_force_u, round).ToString();
-                l_D.Text = Math.Round(images.getActual().drag_force, round).ToString();
+                int round = 0;
+                l_D_l.Text = Math.Round(images.getActual().drag_force_l, round).ToString() + " N";
+                l_D_u.Text = Math.Round(images.getActual().drag_force_u, round).ToString() + " N";
+                l_D.Text = Math.Round(images.getActual().drag_force, round).ToString() + " N";
 
-                l_L_l.Text = Math.Round(images.getActual().lift_force_l, round).ToString();
-                l_L_u.Text = Math.Round(images.getActual().lift_force_u, round).ToString();
-                l_L.Text = Math.Round(images.getActual().lift_force, round).ToString();
+                l_L_l.Text = Math.Round(images.getActual().lift_force_l, round).ToString() + " N";
+                l_L_u.Text = Math.Round(images.getActual().lift_force_u, round).ToString() +  " N";
+                l_L.Text = Math.Round(images.getActual().lift_force, round).ToString() + " N";
 
-                l_M_l.Text = Math.Round(images.getActual().M_l, round).ToString();
-                l_M_u.Text = Math.Round(images.getActual().M_u, round).ToString();
-                l_M.Text = Math.Round(images.getActual().M, round).ToString();
+                l_M_l.Text = Math.Round(images.getActual().M_l, round).ToString() + " Nm";
+                l_M_u.Text = Math.Round(images.getActual().M_u, round).ToString() + " Nm";
+                l_M.Text = Math.Round(images.getActual().M, round).ToString() + " Nm";
                 
             }
             else
@@ -3593,11 +3612,6 @@ namespace IFGPro
 
 
         #endregion       
-
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            images.getActual().computate_DLM(ref GetElasticAxis().location);
-        }
-                       
+              
     }   
 }
