@@ -24,7 +24,7 @@ namespace IFGPro
 {
     internal partial class  MainWindow : Form
     {
-        private string formName = "IFGPro 1.0 - ";
+        private string formName = "IFGPro 2.0 - ";
         #region Variableeees
         //Project name
         public string projectName;
