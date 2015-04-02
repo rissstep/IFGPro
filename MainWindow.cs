@@ -14,17 +14,19 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using Emgu.CV;
+
 using Emgu.CV.Structure;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
 using System.Windows.Media;
+using Framework.Serialization;
 
 namespace IFGPro
 {
     internal partial class  MainWindow : Form
     {
-        private string formName = "IFGPro 2.0 - ";
+        private string formName = "IFGPro 2.1 - ";
         #region Variableeees
         //Project name
         public string projectName;
@@ -336,8 +338,6 @@ namespace IFGPro
         private void imageBox_MouseDown(object sender, MouseEventArgs e)
         {
             isMouseDown = true;
-            //if (!imageBox.IsPointInImage(new Point((int)e.Location.X, (int)e.Location.Y)))
-            //    MessageBox.Show("pica");
             selectedFringeLabels = null;
             ImagePoint fringeLabelsPoint = FringeLabelHit(e.Location);
             if (fringeLabelsPoint != null)
@@ -568,7 +568,6 @@ namespace IFGPro
             }
             else if (isSelected.Equals("calPoint1"))
             {
-
                 if (!calibrateProfilePoint2.IsEmpty())
                 {
                     double distance = GetDistanceBetween(calibrateProfilePoint2.Point, imageBox.PointToImage(e.Location));
@@ -615,11 +614,11 @@ namespace IFGPro
             else if (isSelected.Equals("profile"))
             {
                 MoveProfile((float)(imageBox.PointToImage(x, y).X - imageBox.PointToImage(e.Location).X), 
-                    (float)(imageBox.PointToImage(x, y).Y - imageBox.PointToImage(e.Location).Y));
-                calibrateProfilePoint1.setPointDifference((float)(imageBox.PointToImage(x, y).X - imageBox.PointToImage(e.Location).X), 
-                    (float)(imageBox.PointToImage(x, y).Y - imageBox.PointToImage(e.Location).Y));
-                calibrateProfilePoint2.setPointDifference((float)(imageBox.PointToImage(x, y).X - imageBox.PointToImage(e.Location).X), 
-                    (float)(imageBox.PointToImage(x, y).Y - imageBox.PointToImage(e.Location).Y));
+                            (float)(imageBox.PointToImage(x, y).Y - imageBox.PointToImage(e.Location).Y));
+                calibrateProfilePoint1.setPointDifference(  (float)(imageBox.PointToImage(x, y).X - imageBox.PointToImage(e.Location).X), 
+                                                            (float)(imageBox.PointToImage(x, y).Y - imageBox.PointToImage(e.Location).Y));
+                calibrateProfilePoint2.setPointDifference(  (float)(imageBox.PointToImage(x, y).X - imageBox.PointToImage(e.Location).X), 
+                                                            (float)(imageBox.PointToImage(x, y).Y - imageBox.PointToImage(e.Location).Y));
                 x = e.Location.X;
                 y = e.Location.Y;
 
@@ -2566,6 +2565,7 @@ namespace IFGPro
             //    x.Serialize(writer, objectToSerialize); 
             //} 
 
+            SerializationWriter sw = new SerializationWriter();
             Stream stream = File.Open(filename, FileMode.Create);
             BinaryFormatter bFormatter = new BinaryFormatter();
             bFormatter.Serialize(stream, objectToSerialize);
@@ -2762,18 +2762,18 @@ namespace IFGPro
 
             if (!Double.IsNaN(images.getActual().drag_force) && !computation_is_going)
             {
-                int round = 0;
-                l_D_l.Text = Math.Round(images.getActual().drag_force_l, round).ToString() + " N";
-                l_D_u.Text = Math.Round(images.getActual().drag_force_u, round).ToString() + " N";
-                l_D.Text = Math.Round(images.getActual().drag_force, round).ToString() + " N";
+                int round = 10;
+                l_D_l.Text = ValidFigures((Math.Round(images.getActual().drag_force_l, round))) + " N";
+                l_D_u.Text = ValidFigures((Math.Round(images.getActual().drag_force_u, round))) + " N";
+                l_D.Text = ValidFigures((Math.Round(images.getActual().drag_force, round))) + " N";
 
-                l_L_l.Text = Math.Round(images.getActual().lift_force_l, round).ToString() + " N";
-                l_L_u.Text = Math.Round(images.getActual().lift_force_u, round).ToString() +  " N";
-                l_L.Text = Math.Round(images.getActual().lift_force, round).ToString() + " N";
+                l_L_l.Text = ValidFigures((Math.Round(images.getActual().lift_force_l, round))) + " N";
+                l_L_u.Text = ValidFigures((Math.Round(images.getActual().lift_force_u, round))) +  " N";
+                l_L.Text = ValidFigures((Math.Round(images.getActual().lift_force, round))) + " N";
 
-                l_M_l.Text = Math.Round(images.getActual().M_l, round).ToString() + " Nm";
-                l_M_u.Text = Math.Round(images.getActual().M_u, round).ToString() + " Nm";
-                l_M.Text = Math.Round(images.getActual().M, round).ToString() + " Nm";
+                l_M_l.Text = ValidFigures((Math.Round(images.getActual().M_l, round))) + " Nm";
+                l_M_u.Text = ValidFigures((Math.Round(images.getActual().M_u, round))) + " Nm";
+                l_M.Text = ValidFigures((Math.Round(images.getActual().M, round))) + " Nm";
                 
             }
             else
@@ -2792,6 +2792,38 @@ namespace IFGPro
             }
 
         }
+
+        public string ValidFigures(double number)
+        {
+            return RoundToSignificantFigures(number).ToString(CultureInfo.CreateSpecificCulture("en-GB"));
+
+        }
+
+        public static double RoundToSignificantFigures(double num, int n = 3)
+        {
+            if (num == 0)
+            {
+                return 0;
+            }
+
+            // We are only looking for the next power of 10... 
+            // The double conversion could impact in some corner cases,
+            // but I'm not able to construct them...
+            int d = (int)Math.Ceiling(Math.Log10((double)Math.Abs(num)));
+            int power = n - d;
+
+            // Same here, Math.Pow(10, *) is an integer number
+            double magnitude = Math.Pow(10, power);
+
+            // I'm using the MidpointRounding.AwayFromZero . I'm not sure
+            // having a MidpointRounding.ToEven would be useful (is Banker's
+            // rounding used for significant figures?)
+            double shifted = Math.Round(num * magnitude, 0, MidpointRounding.AwayFromZero);
+            double ret = shifted / magnitude;
+
+            return num >= 0 ? ret : -ret;
+        }
+
         public static double GetDistanceBetween(PointF p1, PointF p2)
         {
             return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
@@ -3545,16 +3577,16 @@ namespace IFGPro
             return testList.ToArray();
 
         }
-        private PointF[] offsetPoints(PointF[] p)
-    {
-        List<PointF> list = new List<PointF>();
-
-        foreach (PointF point in p)
+            private PointF[] offsetPoints(PointF[] p)
         {
-            list.Add(imageBox.GetOffsetPoint(point));
+            List<PointF> list = new List<PointF>();
+
+            foreach (PointF point in p)
+            {
+                list.Add(imageBox.GetOffsetPoint(point));
+            }
+            return list.ToArray();
         }
-        return list.ToArray();
-    }
         private bool IsHitProfile(PointF[] array, PointF p)
         {
             if (array == null)

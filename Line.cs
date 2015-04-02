@@ -103,7 +103,7 @@ namespace IFGPro
             else
                 return false;
         }
-        public void MakeRestorePoint()
+        public void MakeRestorePoint()  
         {
             ListUnDo.Add(new Line(this));
         }
@@ -134,13 +134,14 @@ namespace IFGPro
                 return false;
 
         }
+
         public PointF LocationIndex(Cyotek.Windows.Forms.ImageBox i,Graphics e)
         {
-            SizeF s = new SizeF();
-            System.Windows.Vector v1 = new System.Windows.Vector(this.pointOfProfile.Point.X - this.pointOnProfile.Point.X, this.pointOfProfile.Point.Y - this.pointOnProfile.Point.Y);
+            var s = new SizeF();
+            var v1 = new System.Windows.Vector(this.pointOfProfile.Point.X - this.pointOnProfile.Point.X, this.pointOfProfile.Point.Y - this.pointOnProfile.Point.Y);
             //v1.Normalize();
-            System.Windows.Vector v2 = new System.Windows.Vector(1, 0);
-            double angleBetween = System.Windows.Vector.AngleBetween(v1, v2);
+            var v2 = new System.Windows.Vector(1, 0);
+            var angleBetween = System.Windows.Vector.AngleBetween(v1, v2);
             angleBetween = angleBetween * Math.PI / 180;
 
             if (angleBetween < 0)
@@ -153,11 +154,10 @@ namespace IFGPro
                 s = e.MeasureString(this.Index.ToString(), GlobalSettings.fontLines);
             s = new SizeF((float)(s.Width / i.ZoomFactor), (float)(s.Height / i.ZoomFactor));
 
-            PointF tmpPoint = new PointF(pointOfProfile.Point.X + (float)(s.Width * xFactor(angleBetween)), pointOfProfile.Point.Y + (float)(s.Height * yFactor(angleBetween)));
+            var tmpPoint = new PointF(pointOfProfile.Point.X + (float)(s.Width * xFactor(angleBetween)), pointOfProfile.Point.Y + (float)(s.Height * yFactor(angleBetween)));
 
             return i.GetOffsetPoint(tmpPoint);
         }
-
         public PointF LocationIndexSuper(Cyotek.Windows.Forms.ImageBox i)
         {
             System.Windows.Vector v = new System.Windows.Vector(pointOfProfile.Point.X - pointOnProfile.Point.X, pointOfProfile.Point.Y - pointOnProfile.Point.Y);
@@ -175,6 +175,7 @@ namespace IFGPro
         {
             return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
         }
+
         private void CalculateParameters()
         {
             double T0 = MeasureParameters.t0 + 273.15;
@@ -257,11 +258,7 @@ namespace IFGPro
         }
         private bool isInInterval(double low, double high, double n)
         {
-            if (low <= n && n <= high)
-                return true;
-            else
-                return false;
+            return low <= n && n <= high;
         }
-        
     }
 }

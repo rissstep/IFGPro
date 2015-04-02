@@ -68,7 +68,10 @@ namespace IFGPro
                 PointF offsetPoint = i.GetOffsetPoint(Point);
                 p = i.GetOffsetPoint(p);
                 double s = size * 1;
-                if ((offsetPoint.X + (s / 2)) >= p.X && (offsetPoint.X - (s / 2)) <= p.X && (offsetPoint.Y + (s / 2)) >= p.Y && (offsetPoint.Y - (s / 2)) <= p.Y)
+                if ((offsetPoint.X + (s / 2)) >= p.X && 
+                    (offsetPoint.X - (s / 2)) <= p.X && 
+                    (offsetPoint.Y + (s / 2)) >= p.Y && 
+                    (offsetPoint.Y - (s / 2)) <= p.Y)
                     return true;
                 else
                     return false;

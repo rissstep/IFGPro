@@ -65,7 +65,6 @@ namespace IFGPro
 
         public BindingList<Line> listUpperLines { get { return _listUpperLines; } set { 
             _listUpperLines = value; 
-            //OnPropertyChanged("listUpperLines"); 
         } }
         public BindingList<Line> listDownerLines
         {
@@ -127,6 +126,7 @@ namespace IFGPro
             PointF pointOfProfile = GetOffPoint(pointOnProfile,p,GlobalSettings.lineLength);
             try
             {
+
                 l.pointOfProfile.Point = pointOfProfile;
                 l.pointOnProfile.Point = pointOnProfile;
             }
@@ -145,7 +145,6 @@ namespace IFGPro
                 MessageBox.Show("neco se posralo kamarade> " + e.ToString());
             }
 
-            //l.Sur_Coor = GetSurfaceCoor(l);
         }
         public void setPoint1(PointF p, bool isMoving = false, float diferenceX = 0,float diferenceY = 0)
         {
@@ -312,6 +311,8 @@ namespace IFGPro
 
         }
         public static PointF GetPointOnProfile(PointF[] array, PointF p)
+
+
         {
             PointF fClosest = PointF.Empty;    //first closest
             double fDistance = double.MaxValue;

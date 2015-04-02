@@ -49,6 +49,7 @@ namespace IFGPro
         {
             g.DrawEllipse(pen, center.X - ratio * n, center.Y - ratio * n, ratio * n * 2, ratio * n * 2);
         }
+
         public PointF GetLabelLocation(Cyotek.Windows.Forms.ImageBox i)
         {
             return new PointF(i.GetOffsetPoint(new PointF(location.X + labelOffsetX, location.Y + labelOffsetY)).X, i.GetOffsetPoint(new PointF(location.X + labelOffsetX, location.Y + labelOffsetY)).Y + (float)(8 * ((i.ZoomFactor - 0.7) / 0.3)));
@@ -68,6 +69,7 @@ namespace IFGPro
                 return true;
             return false;
         }
+
         public bool IsHit(PointF p, Cyotek.Windows.Forms.ImageBox i)
         {
             p = i.GetOffsetPoint(p);
@@ -76,6 +78,7 @@ namespace IFGPro
                 return true;
             return false;
         }
+
         public void setPointLocationByPoint(PointF p, PointF leading, PointF falling)
         {
             System.Windows.Vector v1 = new System.Windows.Vector(falling.X - leading.X, falling.Y - leading.Y);
@@ -97,6 +100,7 @@ namespace IFGPro
             }
             
         }
+
         public void setPointLocation(PointF leading, PointF falling)
         {
             //double d = MainWindow.GetDistanceBetween(leading, falling);
@@ -122,6 +126,7 @@ namespace IFGPro
             location.X = (float)xTmp;
             location.Y = (float)yTmp;
         }
+
         private void setSurfaceDistanceByPoint(PointF leading, PointF falling)
         {
             double ratio = MainWindow.GetDistanceBetween(leading, falling);
