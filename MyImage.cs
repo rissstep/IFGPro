@@ -63,9 +63,7 @@ namespace IFGPro
 
         //public PointF[] arrayProfile { get { return _arrayProfile; } set { _arrayProfile = value;} }    
 
-        public BindingList<Line> listUpperLines { get { return _listUpperLines; } set { 
-            _listUpperLines = value; 
-        } }
+        public BindingList<Line> listUpperLines { get { return _listUpperLines; } set { _listUpperLines = value; } }
         public BindingList<Line> listDownerLines
         {
             get { return _listDownerLines; }
@@ -85,8 +83,7 @@ namespace IFGPro
         }
 
 
-        public MyImage()
-        { 
+        public MyImage(){ 
         
         }
 
@@ -120,6 +117,8 @@ namespace IFGPro
             this.MakeRestorePoint(l);
             l.Sur_Coor = GetSurfaceCoor(l);
         }
+
+
         public void setLine(Line l,PointF p)
         {
             PointF pointOnProfile = GetPointOnProfile(arrayProfile, p);
@@ -311,8 +310,6 @@ namespace IFGPro
 
         }
         public static PointF GetPointOnProfile(PointF[] array, PointF p)
-
-
         {
             PointF fClosest = PointF.Empty;    //first closest
             double fDistance = double.MaxValue;
@@ -760,9 +757,10 @@ namespace IFGPro
                    
                 }
             //f.ShowDialog();
-            drag_force_u *= (1.0 / steps) * w;
-            lift_force_u *= (1.0 / steps)* w ;
-            M_u *= (1.0 / steps)* w;
+            var tmp_lenght_surface = px2mm(upper_distance * GetDistanceBetween(point1.Point, point2.Point)) * 1e-3;
+            drag_force_u *= (1.0 / steps) * w * tmp_lenght_surface;
+            lift_force_u *= (1.0 / steps) * w * tmp_lenght_surface;
+            M_u *= (1.0 / steps) * w * tmp_lenght_surface;
 
         }
 
@@ -855,9 +853,10 @@ namespace IFGPro
 
             }
             //f.ShowDialog();
-            drag_force_l *= (1.0 / steps) * w ;
-            lift_force_l *= (1.0 / steps) * w ;
-            M_l *= (1.0 / steps) * w;
+            var tmp_lenght_surface = px2mm(lower_distance * GetDistanceBetween(point1.Point, point2.Point)) * 1e-3;
+            drag_force_l *= (1.0 / steps) * w * tmp_lenght_surface;
+            lift_force_l *= (1.0 / steps) * w * tmp_lenght_surface;
+            M_l *= (1.0 / steps) * w * tmp_lenght_surface;
 
         }
 
@@ -1077,24 +1076,22 @@ namespace IFGPro
             try
             {
 
-                if (this.listDownerLines.Count >= 2 && this.listUpperLines.Count >= 2)
+                if (listDownerLines.Count >= 2 && listUpperLines.Count >= 2)
                 {
-                    foreach (Line l in this.listDownerLines)
-                        if (l.F_Index == String.Empty)
-                        {
-                            this.set_DML_NaN();
-                            return;
-                        }
+                    if (listDownerLines.Any(l => l.F_Index == String.Empty))
+                    {
+                        set_DML_NaN();
+                        return;
+                    }
 
-                    foreach (Line l in this.listUpperLines)
-                        if (l.F_Index == String.Empty)
-                        {
-                            this.set_DML_NaN();
-                            return;
-                        }
+                    if (listUpperLines.Any(l => l.F_Index == String.Empty))
+                    {
+                        set_DML_NaN();
+                        return;
+                    }
 
 
-                    this.computate_DLM(ref ea);
+                    computate_DLM(ref ea);
                     return;
                 }
                 this.set_DML_NaN();

@@ -14,7 +14,7 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using Emgu.CV;
-
+using Emgu.Util;
 using Emgu.CV.Structure;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -26,7 +26,7 @@ namespace IFGPro
 {
     internal partial class  MainWindow : Form
     {
-        private string formName = "IFGPro 2.1 - ";
+        private string formName = "IFGPro 2.3 - ";
         #region Variableeees
         //Project name
         public string projectName;
@@ -2795,7 +2795,8 @@ namespace IFGPro
 
         public string ValidFigures(double number)
         {
-            return RoundToSignificantFigures(number).ToString(CultureInfo.CreateSpecificCulture("en-GB"));
+            //return RoundToSignificantFigures(number).ToString(CultureInfo.CreateSpecificCulture("en-GB"));}}
+            return DoubleToString(number, 3);
 
         }
 
@@ -2822,6 +2823,78 @@ namespace IFGPro
             double ret = shifted / magnitude;
 
             return num >= 0 ? ret : -ret;
+        
+        
+        }
+
+        public static string DoubleToString(double value, int figures)
+        {
+            if (figures <= 0)
+                throw new ArgumentOutOfRangeException("figures");
+
+            string text = null;
+            var negative = value < 0.0;
+            var useValue = Math.Abs(value);
+            var shift = 0;
+
+            if (value == 0.0)
+            {
+                if (figures > 1)
+                    text = "0.".PadRight(figures - 1, '0');
+                else
+                    text = "0";
+            }
+            else
+            {
+                while (true)
+                {
+                    var intValue = (long)Math.Round(useValue);
+                    var intText = intValue.ToString();
+
+                    if (intValue > 0 && intText.Length == figures)
+                    {
+                        text = intText;
+
+                        if (shift >= 1)
+                        {
+                            // Insert decimal point
+                            var decimalPos = text.Length - shift;
+
+                            if (shift >= figures)
+                            {
+                                // Decimal point is to the left of the 1st digit
+                                text = "0.".PadRight(shift - figures + 2, '0') + intText;
+                            }
+                            else
+                            {
+                                // Decimal point is to the right of the 1st digit
+                                text = intText.Substring(0, decimalPos) + "." + intText.Substring(decimalPos);
+                            }
+                        }
+                        else
+                        {
+                            // Add trailing 0s
+                            text = text.PadRight(-shift + figures, '0');
+                        }
+                        break;
+                    }
+                    else if (intText.Length > figures)
+                    {
+                        useValue *= 0.1;
+                        shift--;
+                    }
+                    else
+                    {
+                        useValue *= 10;
+                        shift++;
+                    }
+                }
+            }
+
+            if (negative)
+                return "-" + text;
+            else
+                return text;
         }
 
         public static double GetDistanceBetween(PointF p1, PointF p2)
